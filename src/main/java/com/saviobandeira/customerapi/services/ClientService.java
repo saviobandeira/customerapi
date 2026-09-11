@@ -20,14 +20,7 @@ public class ClientService {
     public ClientDTO findById(Long id) {
         Optional<Client> result = repository.findById(id);
         Client client = result.get();
-        ClientDTO dto = new ClientDTO(
-                client.getId(),
-                client.getName(),
-                client.getCpf(),
-                client.getIncome(),
-                client.getBirthDate(),
-                client.getChildren()
-        );
+        ClientDTO dto = new ClientDTO(client);
         return dto;
     }
 }
