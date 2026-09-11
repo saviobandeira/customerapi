@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
@@ -17,8 +18,8 @@ public class ClientController {
     private ClientService service;
 
     @GetMapping(value = "/{id}")
-    public ClientDTO findById(@PathVariable Long id) {
+    public ResponseEntity<ClientDTO> findById(@PathVariable Long id) {
         ClientDTO dto = service.findById(id);
-        return dto;
+        return ResponseEntity.ok(dto);
     }
 }
