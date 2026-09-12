@@ -3,6 +3,7 @@ package com.saviobandeira.customerapi.services;
 import com.saviobandeira.customerapi.repositories.ClientRepository;
 import com.saviobandeira.customerapi.dto.ClientDTO;
 import com.saviobandeira.customerapi.entities.Client;
+import com.saviobandeira.customerapi.services.exceptions.ResourceNotFoundException;
 
 import java.util.Optional;
 
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ClientService {
@@ -20,10 +24,10 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id) {
-        Optional<Client> result = repository.findById(id);
-        Client client = result.get();
-        ClientDTO dto = new ClientDTO(client);
-        return dto;
+        Client client = repository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Recurso não encontrado")
+        );
+        return new ClientDTO(client);
     }
 
     @Transactional(readOnly = true)
@@ -42,14 +46,22 @@ public class ClientService {
 
     @Transactional
     public ClientDTO update(Long id, ClientDTO dto) {
-        Client client = repository.getReferenceById(id);
-        copyDtoToClient(dto, client);
-        client = repository.save(client);
-        return new ClientDTO(client);
+        try {
+            Client client = repository.getReferenceById(id);
+            copyDtoToClient(dto, client);
+            client = repository.save(client);
+            return new ClientDTO(client);
+        }
+        catch (EntityNotFoundException error) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
     }
 
     @Transactional
     public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
         repository.deleteById(id);
     }
 
